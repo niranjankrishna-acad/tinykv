@@ -1,11 +1,17 @@
+use std::net::{TcpStream, Shutdown, TcpListener};
+use std::io::{ Read, Write};
 use std::thread;
-use std::net::{TcpListener, TcpStream, Shutdown};
-use std::io::{Read, Write};
+
+mod protocol;
+
+const MAX_DATA_SIZE: usize = 2 * 1024 * 1024; // 2 MB
 
 fn handle_client(mut stream: TcpStream) {
-    let mut data = [0 as u8; 50];
+    let mut data = vec![0u8; MAX_DATA_SIZE];
     while match stream.read(&mut data) {
         Ok(size) => {
+            // process request + send response
+            protocol::read(&data);
             stream.write(&data[0..size]).unwrap();
             true
         },
